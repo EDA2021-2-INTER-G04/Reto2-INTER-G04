@@ -70,11 +70,22 @@ def loadArtworks(catalog):
         model.addArtwork(catalog, artwork)
 
 # Funciones de ordenamiento
-def filterDatesArtworks(catalog, InitialDate, FinalDate):
+def sortArtworksByAcquiredDate(filtredArtworks):
     """
-    Ordena las obras por fecha de adquisición
+    Ordena las obras por la fecha en la que fueron adquiridas.
     """
-    return model.filterDatesArtworks(catalog, InitialDate, FinalDate)
+
+    return model.sortArtworksByAcquiredDate(filtredArtworks)
+
+def sortByBirth(catalog, year0, year1):
+    artists = catalog["artists"]
+
+    return model.sortByBirth(artists, year0, year1)
+
+def filterByDate(catalog, date0, date1):
+    artworks = catalog["artworks"]
+
+    return model.filterByDate(artworks, date0, date1)
 
 def listChronArtists(catalog, InitialDate, FinalDate):
     
@@ -89,7 +100,9 @@ def transportArtworks(catalog, department):
     return model.transportArtworks(catalog, department)
 
 # Funciones de consulta sobre el catálogo
+def findArtworksNationalities(catalog, nationality):
 
+    return model.findArtworksNationalities(catalog, nationality)
 
 def lastArtists(catalog):
     

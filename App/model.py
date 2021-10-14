@@ -54,10 +54,10 @@ def newCatalog():
     catalog = {'artworks': None,
                'artists': None,
                "medium" : None,
-               }
+               "nationality": None}
 
     catalog['artworks'] = lt.newList()
-    catalog['artists'] = lt.newList("LINKED_LIST"
+    catalog['artists'] = lt.newList("ARRAY_LIST"
                                     )
 
     """
@@ -69,6 +69,10 @@ def newCatalog():
                                     loadfactor=4.0,
                                     comparefunction=comparebyMedium)
 
+    numArtists = lt.size(catalog["artists"])
+    
+    catalog["nationality"] = mp.newMap(numArtists, maptype="PROBING", loadfactor=0.4, comparefunction=comparebyNationality)
+
     return catalog
 
 # Funciones para agregar informacion al catalogo
@@ -76,6 +80,8 @@ def newCatalog():
 def addArtwork(catalog, artwork):
     
     lt.addLast(catalog['artworks'], artwork)
+
+
     medium = artwork["Medium"]
     isPresent = mp.contains(catalog["medium"], medium)
     if isPresent == True:
@@ -86,9 +92,32 @@ def addArtwork(catalog, artwork):
         listm = lt.newList('ARRAY_LIST')
         lt.addLast(listm, artwork)
         mp.put(catalog["medium"], medium, listm)
+
+    listArtists = findArtist(artwork["ConstituentID"], catalog["artists"])
     
-def addArtist(catalog, artistname):
-    lt.addLast(catalog['artists'], artistname)
+    artworkNationalities = lt.newList(datastructure="ARRAY_LIST", cmpfunction=cmpNationalities)
+
+    for i in range(1, lt.size(listArtists)+1):
+        artist = lt.getElement(listArtists, i)
+        nationality = artist["Nationality"]
+        if lt.isPresent(artworkNationalities, nationality) == 0:
+            lt.addLast(artworkNationalities, nationality)
+    
+    for h in range(1, lt.size(artworkNationalities)+1):
+        nationality = lt.getElement(artworkNationalities, h)
+        isPresent = mp.contains(catalog["nationality"], nationality)
+        if isPresent:
+            listNat = mp.get(catalog["nationality"], nationality)["value"]
+            lt.addLast(listNat, artwork)
+            mp.put(catalog["nationality"], nationality, listNat)
+        else:
+            listNat = lt.newList("ARRAY_LIST")
+            lt.addLast(listNat, artwork)
+            mp.put(catalog["nationality"], nationality, listNat)
+
+    
+def addArtist(catalog, artist):
+    lt.addLast(catalog['artists'], artist)
     
 # Funciones para creacion de datos
 
@@ -107,6 +136,7 @@ def newArtwork(name):
     return artwork
 
 # Funciones de consulta
+
 
 def lastArtists(catalog):
     
@@ -176,6 +206,20 @@ def strDateToInt(Date):
     return None
 
 #Funciones de ordenamiento
+def cmpArtistByBeginDate(artist1, artist2): #O(1)
+    """
+    Devuelve verdadero si la "BeginDate" del artista 1 es menor que la del artista 2.
+    Args: artist1: información del primer artista que incluye su valor "BeginDate"
+    artwork2: información del segundo artista que incluye su valor "BeginDate
+    """
+
+    return int(artist1["BeginDate"]) < int(artist2["BeginDate"])
+
+def cmpNationalities(nationality1, nationality2):
+    if nationality1 == nationality2:
+        return True
+    else:
+        return False
 
 def cmpArterokByDateAcquired(artwork1, artwork2):
 
@@ -235,15 +279,23 @@ def comparebyMedium(keyname, medium):
     else:
         return -1
 
-def sortArtworksByDate(catalog, size):
-    sub_list = lt.subList(catalog['artworks'], 1, lt.size(catalog['artworks']))
-    sub_list = sub_list.copy()
-    start_time = time.process_time()
-    sorted_list = mes.sort(sub_list, cmpArterokByDate)
-    stop_time = time.process_time()
-    elapsed_time_mseg = (stop_time - start_time)*1000
+def comparebyNationality(keyname, nationality):
+    authentry = me.getKey(nationality)
+    if (keyname == authentry):
+        return 0
+    elif (keyname > authentry):
+        return 1
+    else:
+        return -1
 
-    return elapsed_time_mseg, sorted_list
+def filterByDate(artworks, date0, date1): #O(n)
+    filtredList = lt.newList(datastructure="ARRAY_LIST")
+    for i in range(1, lt.size(artworks)+1):
+        actualArtwork = lt.getElement(artworks, i)
+        if date0 <= actualArtwork["DateAcquired"] <= date1:
+            lt.addLast(filtredList, actualArtwork)
+
+    return filtredList
 
 def sortMediumsByDate(listm):
     
@@ -284,32 +336,14 @@ def getArtistsName(catalog, constituentID):
     
     return artistNames
 
-def filterDatesArtworks(catalog, InitialDate, FinalDate):
-    
-    result = sortArtworks(catalog, lt.size(catalog["artworks"]), 3)
-    filterListDate = lt.newList()
-    i=0
-    while i < lt.size(result[1]):
-        element = lt.getElement(result[1],i)
-        dateAcquired = strDateToInt(element['DateAcquired'])
-        if dateAcquired != None and dateAcquired >= strDateToInt(InitialDate) and dateAcquired <= strDateToInt(FinalDate):
-            lt.addLast(filterListDate,element)
-        i = i + 1
+def sortArtworksByAcquiredDate(filtredArtworks): #O(n log(n))
+    start_time = time.process_time()
 
-    filterListPurchase = lt.newList()
-    i=0
-    while i < lt.size(filterListDate):
-        element = lt.getElement(filterListDate,i)
-        creditLine = element['CreditLine']
-        if creditLine == "Purchase":
-            lt.addLast(filterListPurchase,element)
-        i = i + 1
+    sorted_list = mes.sort(filtredArtworks, cmpArterokByDateAcquired) 
 
-    sizeFilterListDate = lt.size(filterListDate)
-    sizeFilterListPurchase = lt.size(filterListPurchase)
-    firstandlast = firstAndlastArtworks(catalog, filterListPurchase)
-
-    return sizeFilterListDate, sizeFilterListPurchase, firstandlast
+    stop_time = time.process_time()
+    elapsed_time_mseg = (stop_time - start_time)*1000
+    return elapsed_time_mseg, sorted_list
 
 def filterTechnicArtists(catalog, ArtistName):
 
@@ -409,6 +443,16 @@ def transportArtworks(catalog, department):
 
     return sizeFilterListDept, totalCost, totalWeight, filterListDept, listByCost
 
+def sortArtworksByDate(catalog, size):
+    sub_list = lt.subList(catalog['artworks'], 1, lt.size(catalog['artworks']))
+    sub_list = sub_list.copy()
+    start_time = time.process_time()
+    sorted_list = mes.sort(sub_list, cmpArterokByDate)
+    stop_time = time.process_time()
+    elapsed_time_mseg = (stop_time - start_time)*1000
+
+    return elapsed_time_mseg, sorted_list
+
 def findArtworksMedium(catalog, medium, nArtworks):
 
     listm = mp.get(catalog["medium"], medium)["value"]
@@ -418,3 +462,44 @@ def findArtworksMedium(catalog, medium, nArtworks):
     else:
         sub_listn = lt.subList(result, 1, nArtworks)
         return sub_listn
+
+def findArtist(ID: str, fullArtists):
+    artistID = ID.replace("[","")
+    artistID = artistID.replace("]","")
+
+    IDs = artistID.split(", ")
+    numArtists = len(IDs)
+
+    artists = lt.newList(datastructure="ARRAY_LIST")
+
+    n = 1
+    numFounded = 0
+    while (numFounded < numArtists) and (n <= lt.size(fullArtists)):
+        actualArtist = lt.getElement(fullArtists, n)
+        if actualArtist["ConstituentID"] in IDs:
+            numFounded += 1
+            lt.addLast(artists, actualArtist)
+        n += 1
+    
+    return artists
+
+def sortByBirth(artists, year0, year1): #O(n)
+    start_time = time.process_time()
+    filtredList = lt.newList(datastructure="ARRAY_LIST")
+
+    for i in range(1, lt.size(artists)+1):
+        actualArtist = lt.getElement(artists, i)
+
+        if int(year0) <= int(actualArtist["BeginDate"]) <= int(year1):
+            lt.addLast(filtredList, actualArtist)
+
+    sortedList = mes.sort(filtredList, cmpArtistByBeginDate)
+    stop_time = time.process_time()
+    elapsed_time_mseg = (stop_time - start_time)*1000
+
+    return sortedList, elapsed_time_mseg
+
+def findArtworksNationalities(catalog, nationality):
+    listNat = mp.get(catalog["nationality"], nationality)["value"]
+
+    return listNat
