@@ -30,6 +30,7 @@ import time
 import datetime
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
+from DISClib.ADT import orderedmap as om
 from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Sorting import shellsort as sa
 from DISClib.Algorithms.Sorting import insertionsort as ins
@@ -54,7 +55,8 @@ def newCatalog():
     catalog = {'artworks': None,
                'artists': None,
                "medium" : None,
-               "nationality": None}
+               "nationality": None,
+               "birth": None}
 
     catalog['artworks'] = lt.newList()
     catalog['artists'] = lt.newList("ARRAY_LIST"
@@ -72,6 +74,8 @@ def newCatalog():
     numArtists = lt.size(catalog["artists"])
     
     catalog["nationality"] = mp.newMap(numArtists, maptype="PROBING", loadfactor=0.4, comparefunction=comparebyNationality)
+
+    catalog["birth"] = om.newMap(omaptype="BST", comparefunction=compareDates)
 
     return catalog
 
@@ -118,6 +122,19 @@ def addArtwork(catalog, artwork):
     
 def addArtist(catalog, artist):
     lt.addLast(catalog['artists'], artist)
+
+    birthYear = artist["BeginDate"]
+
+    if birthYear != "0":
+        isPresent = om.contains(catalog["birth"], birthYear)
+        if isPresent:
+            listYears = om.get(catalog["birth"], birthYear)["value"]
+            lt.addLast(listYears, artist)
+            om.put(catalog["birth"], birthYear, listYears)
+        else:
+            listYears = lt.newList('ARRAY_LIST')
+            lt.addLast(listYears, artist)
+            om.put(catalog["birth"], birthYear, listYears)
     
 # Funciones para creacion de datos
 
@@ -206,13 +223,32 @@ def strDateToInt(Date):
     return None
 
 #Funciones de ordenamiento
-def cmpArtistByBeginDate(artist1, artist2): #O(1)
+def compareDates(date1, date2):
+    """
+    Compara dos fechas
+    """
+    
+    date1 = datetime.datetime.strptime(date1, "%Y")
+    date2 = datetime.datetime.strptime(date2, "%Y")
+
+    #if len(date1) == 10:
+     #   date1 = datetime.datetime.strptime(date1, "%Y-%m-%d")
+      #  date2 = datetime.datetime.strptime(date2, "%Y-%m-%d")
+
+    if (date1 == date2):
+        return 0
+    elif (date1 > date2):
+        return 1
+    else:
+        return -1
+
+def cmpArtistByBeginDate(artist1, artist2): 
     """
     Devuelve verdadero si la "BeginDate" del artista 1 es menor que la del artista 2.
     Args: artist1: información del primer artista que incluye su valor "BeginDate"
     artwork2: información del segundo artista que incluye su valor "BeginDate
     """
-
+    
     return int(artist1["BeginDate"]) < int(artist2["BeginDate"])
 
 def cmpNationalities(nationality1, nationality2):
@@ -483,17 +519,20 @@ def findArtist(ID: str, fullArtists):
     
     return artists
 
-def sortByBirth(artists, year0, year1): #O(n)
+def sortByBirth(catalog, year0, year1): 
     start_time = time.process_time()
+    
+    valuesList = om.values(catalog["birth"], year0, year1)
     filtredList = lt.newList(datastructure="ARRAY_LIST")
 
-    for i in range(1, lt.size(artists)+1):
-        actualArtist = lt.getElement(artists, i)
-
-        if int(year0) <= int(actualArtist["BeginDate"]) <= int(year1):
+    for i in range(1, lt.size(valuesList)+1):
+        actualValueList = lt.getElement(valuesList, i)
+        for h in range(1, lt.size(actualValueList)+1):
+            actualArtist = lt.getElement(actualValueList, h)
             lt.addLast(filtredList, actualArtist)
-
+        
     sortedList = mes.sort(filtredList, cmpArtistByBeginDate)
+
     stop_time = time.process_time()
     elapsed_time_mseg = (stop_time - start_time)*1000
 

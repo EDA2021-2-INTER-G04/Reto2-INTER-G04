@@ -81,11 +81,11 @@ def initCatalog():
     return controller.initCatalog()
 
 
-def loadData(catalog):
+def loadData(catalog, size):
     """
     Carga los libros en la estructura de datos
     """
-    controller.loadData(catalog)
+    controller.loadData(catalog, size)
 
 def lastArtists(catalog):
 
@@ -129,11 +129,24 @@ while True:
     printMenu()
     inputs = input('Seleccione una opción para continuar\n')
     if int(inputs[0]) == 1:
+        size = int(input(
+            """
+Ingrese el tamaño de la muestra:
+1. small
+2. 5%
+3. 10%
+4. 20%
+5. 30%
+6. 50%
+7. 80%
+8. large\n"""
+        ))
+
         print("Cargando información de los archivos ....")
 
         start_time = time.process_time()
         catalog = initCatalog()
-        loadData(catalog)
+        loadData(catalog, size)
         stop_time = time.process_time()
         elapsed_time_mseg = (stop_time - start_time)*1000
         print("La carga de los datos tardó ", elapsed_time_mseg, " milisegundos.")

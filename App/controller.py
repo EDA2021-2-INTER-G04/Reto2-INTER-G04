@@ -39,33 +39,50 @@ def initCatalog():
 
 # Funciones para la carga de datos
 
-def loadData(catalog):
+def loadData(catalog, size):
     """
     Carga los datos de los archivos y cargar los datos en la
     estructura de datos
     """
-    loadArtists(catalog)
-    loadArtworks(catalog)
+    if size == 1:
+        sample = "-small"
+    elif size == 2:
+        sample = "-5pct"
+    elif size == 3:
+        sample = "-10pct"
+    elif size == 4:
+        sample = "-20pct"
+    elif size == 5:
+        sample = "-30pct"
+    elif size == 6:
+        sample = "-50pct"
+    elif size == 7:
+        sample = "-80pct"
+    elif size == 8:
+        sample = "-large"
 
-def loadArtists(catalog):
+    loadArtists(catalog, sample)
+    loadArtworks(catalog, sample)
+
+def loadArtists(catalog, sample):
     """
     Carga los artistas del archivo.  Por cada libro se toman sus autores y por
     cada uno de ellos, se crea en la lista de autores, a dicho autor y una
     referencia al libro que se esta procesando.
     """
-    artistsfile = cf.data_dir + 'Artists-utf8-small.csv'
-    input_file = csv.DictReader(open(artistsfile, encoding='utf-8'))
+    artistsFile = cf.data_dir + "Artists-utf8" + sample + ".csv"
+    input_file = csv.DictReader(open(artistsFile, encoding='utf-8'))
     for artist in input_file:
         model.addArtist(catalog, artist)
 
-def loadArtworks(catalog):
+def loadArtworks(catalog, sample):
     """
     Carga los artistas del archivo.  Por cada libro se toman sus autores y por
     cada uno de ellos, se crea en la lista de autores, a dicho autor y una
     referencia al libro que se esta procesando.
     """
-    artworksfile = cf.data_dir + 'Artworks-utf8-small.csv'
-    input_file = csv.DictReader(open(artworksfile, encoding='utf-8'))
+    artWorksFile = cf.data_dir + "Artworks-utf8" + sample + ".csv"
+    input_file = csv.DictReader(open(artWorksFile, encoding='utf-8'))
     for artwork in input_file:
         model.addArtwork(catalog, artwork)
 
@@ -78,9 +95,8 @@ def sortArtworksByAcquiredDate(filtredArtworks):
     return model.sortArtworksByAcquiredDate(filtredArtworks)
 
 def sortByBirth(catalog, year0, year1):
-    artists = catalog["artists"]
 
-    return model.sortByBirth(artists, year0, year1)
+    return model.sortByBirth(catalog, year0, year1)
 
 def filterByDate(catalog, date0, date1):
     artworks = catalog["artworks"]
