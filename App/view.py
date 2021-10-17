@@ -161,11 +161,14 @@ Ingrese el tamaño de la muestra:
     elif int(inputs[0]) == 2:
         year0 = input("Ingrese el año inicial\n")
         year1 = input("Ingrese el año final\n")
-
+        
+        start_time = time.process_time()
         sortedArtists = controller.sortByBirth(catalog, year0, year1)
+        printSortedArtists(sortedArtists)
+        stop_time = time.process_time()
+        elapsed_time_mseg = (stop_time - start_time)*1000
 
-        print("La operación tardó ", sortedArtists[1], " milisegundos.")
-        printSortedArtists(sortedArtists[0])
+        print("\nLa operación tardó ", elapsed_time_mseg, " milisegundos.")
 
     elif int(inputs[0]) == 3:
         date0 = input("Ingrese la fecha desde la cual filtrar (en forma AAAA-MM-DD): ")

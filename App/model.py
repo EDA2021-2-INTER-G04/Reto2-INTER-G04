@@ -520,8 +520,6 @@ def findArtist(ID: str, fullArtists):
     return artists
 
 def sortByBirth(catalog, year0, year1): 
-    start_time = time.process_time()
-    
     valuesList = om.values(catalog["birth"], year0, year1)
     filtredList = lt.newList(datastructure="ARRAY_LIST")
 
@@ -533,10 +531,7 @@ def sortByBirth(catalog, year0, year1):
         
     sortedList = mes.sort(filtredList, cmpArtistByBeginDate)
 
-    stop_time = time.process_time()
-    elapsed_time_mseg = (stop_time - start_time)*1000
-
-    return sortedList, elapsed_time_mseg
+    return sortedList
 
 def findArtworksNationalities(catalog, nationality):
     listNat = mp.get(catalog["nationality"], nationality)["value"]
