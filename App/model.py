@@ -59,8 +59,7 @@ def newCatalog():
                "birth": None}
 
     catalog['artworks'] = lt.newList()
-    catalog['artists'] = lt.newList("ARRAY_LIST"
-                                    )
+    catalog['artists'] = lt.newList("ARRAY_LIST")
 
     """
     Este indice crea un map cuya llave es el medio de la obra
@@ -521,17 +520,12 @@ def findArtist(ID: str, fullArtists):
 
 def sortByBirth(catalog, year0, year1): 
     valuesList = om.values(catalog["birth"], year0, year1)
-    filtredList = lt.newList(datastructure="ARRAY_LIST")
 
     for i in range(1, lt.size(valuesList)+1):
         actualValueList = lt.getElement(valuesList, i)
-        for h in range(1, lt.size(actualValueList)+1):
-            actualArtist = lt.getElement(actualValueList, h)
-            lt.addLast(filtredList, actualArtist)
-        
-    sortedList = mes.sort(filtredList, cmpArtistByBeginDate)
-
-    return sortedList
+        mes.sort(actualValueList, cmpArtistByBeginDate)
+ 
+    return valuesList
 
 def findArtworksNationalities(catalog, nationality):
     listNat = mp.get(catalog["nationality"], nationality)["value"]
