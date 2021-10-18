@@ -68,13 +68,13 @@ def newCatalog():
     catalog["medium"] = mp.newMap(initialSize,
                                     maptype="CHAINING",
                                     loadfactor=4.0,
-                                    comparefunction=comparebyMedium)
+                                    comparefunction=cmpMaps)
 
     numArtists = lt.size(catalog["artists"])
     
-    catalog["nationality"] = mp.newMap(numArtists, maptype="PROBING", loadfactor=0.4, comparefunction=comparebyNationality)
+    catalog["nationality"] = mp.newMap(numArtists, maptype="PROBING", loadfactor=0.4, comparefunction=cmpMaps)
 
-    catalog["birth"] = om.newMap(omaptype="BST", comparefunction=compareDates)
+    catalog["birth"] = mp.newMap(numArtists, maptype="PROBING", loadfactor=0.5, comparefunction=cmpMaps)
 
     return catalog
 
@@ -96,7 +96,7 @@ def addArtwork(catalog, artwork):
 
 
     listArtists = findArtist(artwork["ConstituentID"], catalog["artists"])
-    artworkNationalities = lt.newList(datastructure="ARRAY_LIST", cmpfunction=cmpNationalities)
+    artworkNationalities = lt.newList(datastructure="ARRAY_LIST", cmpfunction=cmpStrings)
 
     for i in range(1, lt.size(listArtists)+1):
         artist = lt.getElement(listArtists, i)
@@ -123,15 +123,15 @@ def addArtist(catalog, artist):
     birthYear = artist["BeginDate"]
 
     if birthYear != "0":
-        isPresent = om.contains(catalog["birth"], birthYear)
+        isPresent = mp.contains(catalog["birth"], birthYear)
         if isPresent:
-            listYears = om.get(catalog["birth"], birthYear)["value"]
+            listYears = mp.get(catalog["birth"], birthYear)["value"]
             lt.addLast(listYears, artist)
-            om.put(catalog["birth"], birthYear, listYears)
+            mp.put(catalog["birth"], birthYear, listYears)
         else:
             listYears = lt.newList('ARRAY_LIST')
             lt.addLast(listYears, artist)
-            om.put(catalog["birth"], birthYear, listYears)
+            mp.put(catalog["birth"], birthYear, listYears)
     
 # Funciones para creacion de datos
 
@@ -237,25 +237,6 @@ def cmpByValueSize(pair1, pair2):
 
     return lt.size(list1) < lt.size(list2)
 
-def compareDates(date1, date2):
-    """
-    Compara dos fechas
-    """
-    
-    date1 = datetime.datetime.strptime(date1, "%Y")
-    date2 = datetime.datetime.strptime(date2, "%Y")
-
-    #if len(date1) == 10:
-     #   date1 = datetime.datetime.strptime(date1, "%Y-%m-%d")
-      #  date2 = datetime.datetime.strptime(date2, "%Y-%m-%d")
-
-    if (date1 == date2):
-        return 0
-    elif (date1 > date2):
-        return 1
-    else:
-        return -1
-
 def cmpArtistByBeginDate(artist1, artist2): 
     """
     Devuelve verdadero si la "BeginDate" del artista 1 es menor que la del artista 2.
@@ -265,8 +246,8 @@ def cmpArtistByBeginDate(artist1, artist2):
     
     return int(artist1["BeginDate"]) < int(artist2["BeginDate"])
 
-def cmpNationalities(nationality1, nationality2):
-    if nationality1 == nationality2:
+def cmpStrings(string1, string2):
+    if string1 == string2:
         return True
     else:
         return False
@@ -316,21 +297,8 @@ def cmpArterokByDate(artwork1, artwork2):
 
     return Date1 < Date2
 
-def comparebyMedium(keyname, medium):
-    """
-    Compara dos nombres de autor. El primero es una cadena
-    y el segundo un entry de un map
-    """
-    authentry = me.getKey(medium)
-    if (keyname == authentry):
-        return 0
-    elif (keyname > authentry):
-        return 1
-    else:
-        return -1
-
-def comparebyNationality(keyname, nationality):
-    authentry = me.getKey(nationality)
+def cmpMaps(keyname, value):
+    authentry = me.getKey(value)
     if (keyname == authentry):
         return 0
     elif (keyname > authentry):
@@ -534,13 +502,20 @@ def findArtist(ID: str, fullArtists):
     return artists
 
 def sortByBirth(catalog, year0, year1): 
-    valuesList = om.values(catalog["birth"], year0, year1)
+    keyList = mp.keySet(catalog["birth"])
+    filtredArtists = lt.newList(datastructure="ARRAY_LIST")
+    
+    for w in range(1, lt.size(keyList)+1):
+        actualKey = lt.getElement(keyList, w)
+        if int(year0) <= int(actualKey) <= int(year1):
+            actualYearList = mp.get(catalog["birth"],actualKey)["value"]
+            for k in range(1, lt.size(actualYearList)+1):
+                actualArtist = lt.getElement(actualYearList, k)
+                lt.addLast(filtredArtists, actualArtist)
 
-    for i in range(1, lt.size(valuesList)+1):
-        actualValueList = lt.getElement(valuesList, i)
-        mes.sort(actualValueList, cmpArtistByBeginDate)
+    mes.sort(filtredArtists, cmpArtistByBeginDate)
  
-    return valuesList
+    return filtredArtists
 
 def findArtworksNationalities(catalog, nationality):
     listNat = mp.get(catalog["nationality"], nationality)["value"]
