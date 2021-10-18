@@ -304,17 +304,21 @@ while True:
 
     elif int(inputs[0]) == 6:
         department = input("Indique el nombre del departamento a consultar: ")
+        start_time = time.process_time()
         result = controller.transportArtworks(catalog, department)
         listA = result[3]
         listC = result[4]
-        print("El total de obras para transportar de ", department, " es de: ", result[0])
-        print("El costo estimado en USD es de: ", str(result[1]))
-        print("EL peso estimado en Kg es de: ", str(result[2]))
-        print("Los 5 items más antiguos para transportar son: ")
+        print("\nEl total de obras para transportar de ", department, " es de: ", result[0])
+        print("\nEl costo estimado es de: ", str(result[1]), " USD.")
+        print("\nEL peso estimado es de: ", str(result[2]), " Kg.")
+        print("\nLos 5 items más antiguos para transportar son: ")
         printFirstFive(listA)
         print("-------------------------------------------------")
-        print("Los 5 items más costosos para transportar son: ")
+        print("\nLos 5 items más costosos para transportar son: ")
         printFirstFive(listC)
+        stop_time = time.process_time()
+        elapsed_time_mseg = (stop_time-start_time)*1000
+        print("\nLa operación tardó ", elapsed_time_mseg, " ms.")
         
     elif int(inputs[0]) == 7:
         medium = input("Indique el medio específico a consultar: ")
@@ -329,11 +333,16 @@ while True:
 
     elif int(inputs[0]) == 8:
         nationality = input("Ingrese la nacionalidad a consultar: ")
+        start_time = time.process_time()
         
         listNat = controller.findArtworksNationalities(catalog, nationality)
         numArtworks = lt.size(listNat)
 
         print("El número total de obras de la nacionalidad ", nationality, " es de ", numArtworks)
+
+        stop_time = time.process_time()
+        elapsed_time_mseg = (stop_time - start_time)*1000
+        print("\nLa operación tardó ", elapsed_time_mseg, " ms.")
 
     else:
         sys.exit(0)

@@ -58,7 +58,8 @@ def newCatalog():
                "nationality": None,
                "birth": None,
                "dateAcquired": None,
-               "creditLine": None}
+               "creditLine": None,
+               "department": None}
 
     catalog['artworks'] = lt.newList()
     catalog['artists'] = lt.newList("ARRAY_LIST")
@@ -82,6 +83,7 @@ def newCatalog():
 
     catalog["creditLine"] = mp.newMap(initialSize, maptype="PROBING", loadfactor=0.4, comparefunction=cmpMaps)
 
+    catalog["department"] = mp.newMap(10, maptype="PROBING", loadfactor=0.5, comparefunction=cmpMaps)
     return catalog
 
 # Funciones para agregar informacion al catalogo
@@ -133,6 +135,18 @@ def addArtwork(catalog, artwork):
             listNat = lt.newList("ARRAY_LIST")
             lt.addLast(listNat, artwork)
             mp.put(catalog["nationality"], nationality, listNat)
+
+    artworkDepartment = artwork["Department"]
+    isPresent = mp.contains(catalog["department"], artworkDepartment)
+    if isPresent:
+        listd = mp.get(catalog["department"], artworkDepartment)["value"]
+        lt.addLast(listd, artwork)
+        mp.put(catalog["department"], artworkDepartment, listd)
+    else:
+        listd = lt.newList('ARRAY_LIST')
+        lt.addLast(listd, artwork)
+        mp.put(catalog["department"], artworkDepartment, listd)
+
 
 def addArtist(catalog, artist):
     lt.addLast(catalog['artists'], artist)
@@ -433,19 +447,19 @@ def filterTechnicArtists(catalog, ArtistName):
     return totalArtworks, totalMediums, granMedium, mostTimes, newmedium
 
 def transportArtworks(catalog, department):
-
-    result = sortArtworksByDate(catalog, lt.size(catalog["artworks"]))
-    listCost = lt.newList()
-
-    filterListDept = lt.newList()
-    i=0
-    while i < lt.size(result[1]):
-        element = lt.getElement(result[1],i)
-        departmenti = element['Department']
-        if departmenti.lower() == department.lower():
-            lt.addLast(filterListDept,element)
-        i = i + 1
-
+    departmentsList = mp.keySet(catalog["department"])
+    found = False
+    k=1
+    while found == False and k <= lt.size(departmentsList):
+        actualDep = lt.getElement(departmentsList, k)
+        actualKey = mp.get(catalog["department"], actualDep)["key"]
+        if actualKey.lower() == department.lower():
+            filterListDept = mp.get(catalog["department"], actualKey)["value"]
+            mes.sort(filterListDept, cmpArterokByDate)
+            found = True
+        k += 1
+    
+    listCost = lt.newList(datastructure="ARRAY_LIST")
     totalCost = 0
     totalWeight = 0
     i=0
@@ -457,17 +471,19 @@ def transportArtworks(catalog, department):
         width = element["Width (cm)"]
         if weight == "":
             kg = 0
-            if height != "" and width != "":
-                if lenght != "":
-                    m3 = (float(height) * float(width) * float(lenght)) * 72
-                else:
-                    m2 = (float(height) * float(width)) * 72
-                    m3 = 0
-            else:
-                m2 = 0
         else:
             kg = float(weight)
             totalWeight += kg
+
+        if height != "" and width != "":
+            if lenght != "":
+                m3 = ((float(height)/100) * (float(width)/100) * (float(lenght)/100)) * 72
+            else:
+                m2 = ((float(height)/100) * (float(width)/100)) * 72
+                m3 = 0
+        else:
+            m2 = 0
+        
         sumx = kg + m2 + m3
         elementCost = 0
         if sumx != 0:
@@ -475,24 +491,21 @@ def transportArtworks(catalog, department):
         else:
             elementCost = 48
         totalCost += elementCost
-        element["elementCost"] = elementCost
+        element["elementCost"] = round(elementCost,2)
         lt.addLast(listCost, element)
-        i = i + 1
+        i += 1
 
     sizeFilterListDept = lt.size(filterListDept)
     listByCost = mes.sort(listCost, cmpArterokByCost)
 
-    return sizeFilterListDept, totalCost, totalWeight, filterListDept, listByCost
+    return sizeFilterListDept, round(totalCost,2), round(totalWeight,2), filterListDept, listByCost
 
 def sortArtworksByDate(catalog, size):
     sub_list = lt.subList(catalog['artworks'], 1, lt.size(catalog['artworks']))
     sub_list = sub_list.copy()
-    start_time = time.process_time()
     sorted_list = mes.sort(sub_list, cmpArterokByDate)
-    stop_time = time.process_time()
-    elapsed_time_mseg = (stop_time - start_time)*1000
 
-    return elapsed_time_mseg, sorted_list
+    return sorted_list
 
 def findArtworksMedium(catalog, medium, nArtworks):
 
@@ -552,9 +565,6 @@ def sortArtworksByAcquiredDate(catalog, date0, date1):
     for i in range(1, lt.size(datesA)+1):
         actualKey = lt.getElement(datesA, i)
         actualPair = mp.get(catalog["dateAcquired"],actualKey)
-        print(date0)
-        print(actualKey)
-        print(date1)
         if actualKey != None and actualKey != "":
             if strDateToInt(date0) <= strDateToInt(actualKey) <= strDateToInt(date1):
                 lt.addLast(orderedDateA, actualPair)
