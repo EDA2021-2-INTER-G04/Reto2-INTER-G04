@@ -41,9 +41,10 @@ def printMenu():
     print("2- Listar cronológicamente los artistas")
     print("3- Listar cronológicamente las adquisiciones")
     print("4- Clasificar las obras de un artista por técnica")
-    print("5- Transportar obras de un departamento")
-    print("6- Las n obras más antiguas para un medio específico")
-    print("7- Número de obras de una nacionalidad")
+    print("5- Clasificar las obras por la nacionalidad de sus creadores")
+    print("6- Transportar obras de un departamento")
+    print("7- Las n obras más antiguas para un medio específico")
+    print("8- Número de obras de una nacionalidad")
     print("0- Salir")
 
 def isDead(Date):
@@ -146,6 +147,31 @@ def printFirstFive(listA):
         , elementA["Dimensions"], ", Clasificación: ", elementA["Classification"], ", Costo: ",  elementA["elementCost"])
         i += 1
 
+def printLoadResult(catalog):
+    print('Artistas cargados: ', lt.size(catalog['artists']))
+    print('Obras cargadas: ', lt.size(catalog['artworks']))
+
+    print("\nPrimeros tres artistas cargados: ")
+    for n in range(1,4):
+        actualArtist = lt.getElement(catalog["artists"], n)
+        print(actualArtist["DisplayName"])
+        
+    print("Últimos tres artistas cargados: ")
+    for n in range(lt.size(catalog["artists"])-2, lt.size(catalog["artists"])+1):
+        actualArtist = lt.getElement(catalog["artists"], n)
+        print(actualArtist["DisplayName"])
+
+
+    print("\nPrimeras tres obras cargadas: ")
+    for n in range(1,4):
+        actualArtist = lt.getElement(catalog["artworks"], n)
+        print(actualArtist["Title"])
+        
+    print("Últimas tres obras cargadas:")
+    for n in range(lt.size(catalog["artworks"])-2, lt.size(catalog["artworks"])+1):
+        actualArtist = lt.getElement(catalog["artworks"], n)
+        print(actualArtist["Title"])
+
 catalog = None
 
 """
@@ -157,31 +183,28 @@ while True:
     if int(inputs[0]) == 1:
         size = int(input(
 """Ingrese el tamaño de la muestra:
-1. small
+1. Small
 2. 5%
 3. 10%
 4. 20%
 5. 30%
 6. 50%
 7. 80%
-8. large\n"""
+8. Large\n"""
         ))
 
         print("Cargando información de los archivos ....")
 
         start_time = time.process_time()
+
         catalog = initCatalog()
         loadData(catalog, size)
-        stop_time = time.process_time()
-        elapsed_time_mseg = (stop_time - start_time)*1000
-        print("La carga de los datos tardó ", elapsed_time_mseg, " milisegundos.")
-        
         lastArtists_ = lastArtists(catalog)
         lastArtworks_ = lastArtworks(catalog)
-        print('Artistas cargados: ' + str(lt.size(catalog['artists'])))
-        print('Obras cargadas: ' + str(lt.size(catalog['artworks'])))
-        print("Últimos tres artistas cargados: " + str(lastArtists_))
-        print("Últimas tres obras cargados: " + str(lastArtworks_))
+        printLoadResult(catalog)
+        stop_time = time.process_time()
+        elapsed_time_mseg = (stop_time - start_time)*1000
+        print("\nLa carga de los datos tardó ", elapsed_time_mseg, " milisegundos.")
 
     elif int(inputs[0]) == 2:
         year0 = input("Ingrese el año inicial\n")
@@ -220,6 +243,24 @@ while True:
             i += 1
         
     elif int(inputs[0]) == 5:
+        start_time = time.process_time()
+        topTen = controller.topTenNats(catalog)
+        print("TOP 10")
+        h = lt.size(topTen)
+        r = 1
+        while lt.size(topTen) >= h >= 1:
+            actualPair = lt.getElement(topTen, h)
+            nationality = actualPair["key"]
+            number = lt.size(actualPair["value"])
+            print(r, ". ", nationality, ": ", number)
+            h -= 1
+            r += 1
+        stop_time = time.process_time()
+        elapsed_time_mseg = (stop_time - start_time)*1000
+        print("\nLa operación tardó ", elapsed_time_mseg, " mseg.")
+        
+
+    elif int(inputs[0]) == 6:
         department = input("Indique el nombre del departamento a consultar: ")
         result = controller.transportArtworks(catalog, department)
         listA = result[3]
@@ -233,7 +274,7 @@ while True:
         print("Los 5 items más costosos para transportar son: ")
         printFirstFive(listC)
         
-    elif int(inputs[0]) == 6:
+    elif int(inputs[0]) == 7:
         medium = input("Indique el medio específico a consultar: ")
         nArtworks = int(input("Indique el número de obras a consultar: "))
         listm = controller.findArtworksMedium(catalog, medium, nArtworks)
@@ -244,7 +285,7 @@ while True:
             , element["Dimensions"])
             i += 1
 
-    elif int(inputs[0]) == 7:
+    elif int(inputs[0]) == 8:
         nationality = input("Ingrese la nacionalidad a consultar: ")
         
         listNat = controller.findArtworksNationalities(catalog, nationality)

@@ -81,9 +81,7 @@ def newCatalog():
 # Funciones para agregar informacion al catalogo
 
 def addArtwork(catalog, artwork):
-    
     lt.addLast(catalog['artworks'], artwork)
-
 
     medium = artwork["Medium"]
     isPresent = mp.contains(catalog["medium"], medium)
@@ -96,15 +94,16 @@ def addArtwork(catalog, artwork):
         lt.addLast(listm, artwork)
         mp.put(catalog["medium"], medium, listm)
 
+
     listArtists = findArtist(artwork["ConstituentID"], catalog["artists"])
-    
     artworkNationalities = lt.newList(datastructure="ARRAY_LIST", cmpfunction=cmpNationalities)
 
     for i in range(1, lt.size(listArtists)+1):
         artist = lt.getElement(listArtists, i)
         nationality = artist["Nationality"]
-        if lt.isPresent(artworkNationalities, nationality) == 0:
-            lt.addLast(artworkNationalities, nationality)
+        if nationality != "" and nationality != None:
+            if lt.isPresent(artworkNationalities, nationality) == 0:
+                lt.addLast(artworkNationalities, nationality)
     
     for h in range(1, lt.size(artworkNationalities)+1):
         nationality = lt.getElement(artworkNationalities, h)
@@ -118,7 +117,6 @@ def addArtwork(catalog, artwork):
             lt.addLast(listNat, artwork)
             mp.put(catalog["nationality"], nationality, listNat)
 
-    
 def addArtist(catalog, artist):
     lt.addLast(catalog['artists'], artist)
 
@@ -152,7 +150,18 @@ def newArtwork(name):
     return artwork
 
 # Funciones de consulta
+def topTenNats(natMap):
+    orderedNats = lt.newList(datastructure="ARRAY_LIST")
+    nationalities = mp.keySet(natMap)
+    for i in range(1, lt.size(nationalities)+1):
+        actualKey = lt.getElement(nationalities, i)
+        actualPair = mp.get(natMap,actualKey)
+        lt.addLast(orderedNats, actualPair)
+    
+    mes.sort(orderedNats, cmpByValueSize)
+    topTen = lt.subList(orderedNats, lt.size(orderedNats)-9, 10)
 
+    return topTen
 
 def lastArtists(catalog):
     
@@ -222,6 +231,12 @@ def strDateToInt(Date):
     return None
 
 #Funciones de ordenamiento
+def cmpByValueSize(pair1, pair2):
+    list1 = pair1["value"]
+    list2 = pair2["value"]
+
+    return lt.size(list1) < lt.size(list2)
+
 def compareDates(date1, date2):
     """
     Compara dos fechas

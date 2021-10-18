@@ -116,6 +116,11 @@ def transportArtworks(catalog, department):
     return model.transportArtworks(catalog, department)
 
 # Funciones de consulta sobre el catálogo
+def topTenNats(catalog):
+    natMap = catalog["nationality"]
+
+    return model.topTenNats(natMap)
+
 def findArtworksNationalities(catalog, nationality):
 
     return model.findArtworksNationalities(catalog, nationality)
