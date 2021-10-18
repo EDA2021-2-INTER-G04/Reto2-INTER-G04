@@ -56,7 +56,9 @@ def newCatalog():
                'artists': None,
                "medium" : None,
                "nationality": None,
-               "birth": None}
+               "birth": None,
+               "dateAcquired": None,
+               "creditLine": None}
 
     catalog['artworks'] = lt.newList()
     catalog['artists'] = lt.newList("ARRAY_LIST")
@@ -76,6 +78,10 @@ def newCatalog():
 
     catalog["birth"] = om.newMap(omaptype="BST", comparefunction=compareDates)
 
+    catalog["dateAcquired"] = mp.newMap(initialSize, maptype="CHAINING", loadfactor=4.0, comparefunction=cmpArterokByDateAcquired)
+
+    catalog["creditLine"] = mp.newMap(initialSize, maptype="PROBING", loadfactor=0.4, comparefunction=comparebyCreditLine)
+
     return catalog
 
 # Funciones para agregar informacion al catalogo
@@ -93,6 +99,17 @@ def addArtwork(catalog, artwork):
         listm = lt.newList('ARRAY_LIST')
         lt.addLast(listm, artwork)
         mp.put(catalog["medium"], medium, listm)
+    
+    dateAcquired = artwork["DateAcquired"]
+    isPresentdA = mp.contains(catalog["dateAcquired"], dateAcquired)
+    if isPresentdA == True:
+        listdA = mp.get(catalog["dateAcquired"], dateAcquired)["value"]
+        lt.addLast(listdA, artwork)
+        mp.put(catalog["dateAcquired"], dateAcquired, listdA)
+    else:
+        listdA = lt.newList('ARRAY_LIST')
+        lt.addLast(listdA, dateAcquired)
+        mp.put(catalog["dateAcquired"], dateAcquired, listdA)
 
 
     listArtists = findArtist(artwork["ConstituentID"], catalog["artists"])
@@ -271,20 +288,29 @@ def cmpNationalities(nationality1, nationality2):
     else:
         return False
 
-def cmpArterokByDateAcquired(artwork1, artwork2):
+def cmpArterokByDateAcquired(date1, date2):
 
     """Compara las fechas de adquisición para ordenarlas ascendentemente"""
 
-    Result = True
-
-    if artwork1["DateAcquired"] == "" or artwork2["DateAcquired"] == "":
-        return False
-    
+    if date1 == "" or date2 == "":
+        return -1
     else:
-        Date1 = strDateToInt(artwork1['DateAcquired'])
-        Date2 = strDateToInt(artwork2['DateAcquired'])
+        Date1 = strDateToInt(date1)
+        Date2 = strDateToInt(date2)
 
-    return Date1 < Date2
+    if (Date1 == Date2):
+        return 0
+    elif (Date1 > Date2):
+        return 1
+    else:
+        return -1
+
+def comparebyCreditLine(creditLine):
+
+    if creditLine == "Purchase":
+        return True
+    else:
+        return False
 
 def sortArtworks(catalog, size, sortingtype):
     sub_list = lt.subList(catalog['artworks'], 1, size)
@@ -385,15 +411,6 @@ def getArtistsName(catalog, constituentID):
         i += 1
     
     return artistNames
-
-def sortArtworksByAcquiredDate(filtredArtworks): #O(n log(n))
-    start_time = time.process_time()
-
-    sorted_list = mes.sort(filtredArtworks, cmpArterokByDateAcquired) 
-
-    stop_time = time.process_time()
-    elapsed_time_mseg = (stop_time - start_time)*1000
-    return elapsed_time_mseg, sorted_list
 
 def filterTechnicArtists(catalog, ArtistName):
 
@@ -546,3 +563,13 @@ def findArtworksNationalities(catalog, nationality):
     listNat = mp.get(catalog["nationality"], nationality)["value"]
 
     return listNat
+
+def sortArtworksByAcquiredDate(catalog, dateAcquired1, dateAcquired2): 
+
+    listdA = mp.get(catalog["dateAcquired"], dateAcquired1, dateAcquired2)
+
+    for i in range(1, lt.size(listdA)+1):
+        actualValueList = lt.getElement(listdA, i)
+        mes.sort(actualValueList, cmpArterokByDateAcquired)
+
+    return listdA

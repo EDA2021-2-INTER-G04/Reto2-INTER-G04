@@ -140,3 +140,5 @@ def getArtistsName(catalog, constituentID):
 def findArtworksMedium(catalog, medium, nArtworks):
 
     return model.findArtworksMedium(catalog, medium, nArtworks)
+
+

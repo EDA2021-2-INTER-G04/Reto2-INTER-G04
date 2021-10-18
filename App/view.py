@@ -147,6 +147,26 @@ def printFirstFive(listA):
         , elementA["Dimensions"], ", Clasificación: ", elementA["Classification"], ", Costo: ",  elementA["elementCost"])
         i += 1
 
+def printFirstandLast(listA):
+    i = 1
+    h = 1
+    while i <= 3:
+        elementA = lt.getElement(listA, i)
+        constituentID = elementA["ConstituentID"]
+        artistName = getArtistsName(catalog, constituentID)
+        print("Título: ", elementA["Title"], ", Artista(s): ", artistName, ", Fecha: ", elementA["Date"], ", Medio: ", elementA["Medium"], ", Dimensiones: "
+        , elementA["Dimensions"])
+        i += 1
+
+    while h <= 3:
+        elementA = lt.getElement(listA, i)
+        constituentID = elementA["ConstituentID"]
+        artistName = getArtistsName(catalog, constituentID)
+        print("Título: ", elementA["Title"], ", Artista(s): ", artistName, ", Fecha: ", elementA["Date"], ", Medio: ", elementA["Medium"], ", Dimensiones: "
+        , elementA["Dimensions"])
+        h += 1
+
+
 def printLoadResult(catalog):
     print('Artistas cargados: ', lt.size(catalog['artists']))
     print('Obras cargadas: ', lt.size(catalog['artworks']))
@@ -221,10 +241,14 @@ while True:
     elif int(inputs[0]) == 3:
         date0 = input("Ingrese la fecha desde la cual filtrar (en forma AAAA-MM-DD): ")
         date1 = input("Ingrese la fecha hasta la cual filtrar (en forma AAAA-MM-DD): ")
+        start_time = time.process_time()
         filtredArtworks = controller.filterByDate(catalog, date0, date1)
         result = controller.sortArtworksByAcquiredDate(filtredArtworks)
-        print("La operación tardó: ", result[0], " milisegundos.")
-        printSortResults(result[1])
+        elapsed_time_mseg = (stop_time - start_time)*1000
+
+        print("\nLa operación tardó ", elapsed_time_mseg, " milisegundos.")
+        print("\nEl número total de obras en el rango cronológico es de ", lt.size(result))
+        printFirstandLast(result)
     
     elif int(inputs[0]) == 4:
         ArtistName = input("Indique el nombre del artista a consultar: ")
