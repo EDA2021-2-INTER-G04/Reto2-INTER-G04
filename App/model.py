@@ -78,9 +78,9 @@ def newCatalog():
 
     catalog["birth"] = mp.newMap(numArtists, maptype="PROBING", loadfactor=0.5, comparefunction=cmpMaps)
 
-    catalog["dateAcquired"] = mp.newMap(initialSize, maptype="CHAINING", loadfactor=4.0, comparefunction=cmpArterokByDateAcquired)
+    catalog["dateAcquired"] = mp.newMap(initialSize, maptype="CHAINING", loadfactor=4.0, comparefunction=cmpMaps)
 
-    catalog["creditLine"] = mp.newMap(initialSize, maptype="PROBING", loadfactor=0.4, comparefunction=comparebyCreditLine)
+    catalog["creditLine"] = mp.newMap(initialSize, maptype="PROBING", loadfactor=0.4, comparefunction=cmpMaps)
 
     return catalog
 
@@ -234,7 +234,7 @@ def listChronoArtists(catalog, initialYear, finalYear):
 
 def strDateToInt(Date):
 
-    """Convierte una fecha dada a int para comparación"""
+    """Convierte una fecha dada a datetime para comparación"""
 
     if Date != "":
         DateF = Date.split("-")
@@ -253,6 +253,12 @@ def cmpByValueSize(pair1, pair2):
     list2 = pair2["value"]
 
     return lt.size(list1) < lt.size(list2)
+
+def cmpByDate(pair1, pair2):
+    date1 = pair1["key"]
+    date2 = pair2["key"]
+
+    return strDateToInt(date1) < strDateToInt(date2)
 
 def cmpArtistByBeginDate(artist1, artist2): 
     """
@@ -332,7 +338,7 @@ def cmpMaps(keyname, value):
     else:
         return -1
 
-def filterByDate(artworks, date0, date1): #O(n)
+def filterByDate(artworks, date0, date1): 
     filtredList = lt.newList(datastructure="ARRAY_LIST")
     for i in range(1, lt.size(artworks)+1):
         actualArtwork = lt.getElement(artworks, i)
@@ -539,12 +545,16 @@ def findArtworksNationalities(catalog, nationality):
 
     return listNat
 
-def sortArtworksByAcquiredDate(catalog, dateAcquired1, dateAcquired2): 
+def sortArtworksByAcquiredDate(catalog, date0, date1): 
 
-    listdA = mp.get(catalog["dateAcquired"], dateAcquired1, dateAcquired2)
+    orderedDateA = lt.newList(datastructure="ARRAY_LIST")
+    datesA = mp.keySet(catalog["dateAcquired"])
+    for i in range(1, lt.size(datesA)+1):
+        actualKey = lt.getElement(datesA, i)
+        actualPair = mp.get(catalog["dateAcquired"],actualKey)
+        if strDateToInt(date0) <= strDateToInt(actualKey) <= strDateToInt(date1):
+            lt.addLast(orderedDateA, actualPair)
+    
+    mes.sort(orderedDateA, cmpByDate)
 
-    for i in range(1, lt.size(listdA)+1):
-        actualValueList = lt.getElement(listdA, i)
-        mes.sort(actualValueList, cmpArterokByDateAcquired)
-
-    return listdA
+    return orderedDateA

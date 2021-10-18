@@ -133,6 +133,15 @@ def printFirstFive(listA):
         i += 1
 
 def printFirstandLast(listA):
+
+    numArtworks = 0
+
+    for date in range(1, lt.size(listA)+1):
+
+        actualDate = lt.getElement(listA, date)
+        actualList = actualDate["value"]
+        numArtworks += lt.size(actualList)
+
     i = 1
     h = 1
     while i <= 3:
@@ -227,12 +236,11 @@ while True:
         date0 = input("Ingrese la fecha desde la cual filtrar (en forma AAAA-MM-DD): ")
         date1 = input("Ingrese la fecha hasta la cual filtrar (en forma AAAA-MM-DD): ")
         start_time = time.process_time()
-        filtredArtworks = controller.filterByDate(catalog, date0, date1)
-        result = controller.sortArtworksByAcquiredDate(filtredArtworks)
+        result = controller.sortArtworksByAcquiredDate(catalog, date0, date1)
         elapsed_time_mseg = (stop_time - start_time)*1000
 
         print("\nLa operación tardó ", elapsed_time_mseg, " milisegundos.")
-        print("\nEl número total de obras en el rango cronológico es de ", lt.size(result))
+        print("\nEl número total de obras en el rango cronológico es de ")
         printFirstandLast(result)
     
     elif int(inputs[0]) == 4:

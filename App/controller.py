@@ -87,12 +87,12 @@ def loadArtworks(catalog, sample):
         model.addArtwork(catalog, artwork)
 
 # Funciones de ordenamiento
-def sortArtworksByAcquiredDate(filtredArtworks):
+def sortArtworksByAcquiredDate(catalog, date0, date1):
     """
     Ordena las obras por la fecha en la que fueron adquiridas.
     """
 
-    return model.sortArtworksByAcquiredDate(filtredArtworks)
+    return model.sortArtworksByAcquiredDate(catalog, date0, date1)
 
 def sortByBirth(catalog, year0, year1):
 
