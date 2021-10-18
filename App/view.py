@@ -128,12 +128,14 @@ def printFirstFive(listA):
         elementA = lt.getElement(listA, i)
         constituentID = elementA["ConstituentID"]
         artistName = getArtistsName(catalog, constituentID)
-        print("Título: ", elementA["Title"], ", Artista(s): ", artistName, ", Fecha: ", elementA["Date"], ", Medio: ", elementA["Medium"], ", Dimensiones: "
+        print("Título: ", elementA["Title"], ", Artista(s): ", artistName, ", Fecha: ", elementA["Date"], ", Fecha de adquisición: ", elementA["DateAcquired"], ", Medio: ", elementA["Medium"], ", Dimensiones: "
         , elementA["Dimensions"], ", Clasificación: ", elementA["Classification"], ", Costo: ",  elementA["elementCost"])
         i += 1
 
 def printFirstandLast(listA):
-
+    size = lt.size(listA)
+    purchased = 0
+    print("El número total de obras dentro del rango es de: ", size, ".")
     numArtworks = 0
 
     for date in range(1, lt.size(listA)+1):
@@ -141,24 +143,47 @@ def printFirstandLast(listA):
         actualDate = lt.getElement(listA, date)
         actualList = actualDate["value"]
         numArtworks += lt.size(actualList)
+        for p in range(1, lt.size(actualList)+1):
+            actualArtwork = lt.getElement(actualList, p)
+            creditLine = actualArtwork["CreditLine"]
+            if "Purchase" in creditLine or "purchase" in creditLine:
+                purchased += 1
 
-    i = 1
-    h = 1
-    while i <= 3:
-        elementA = lt.getElement(listA, i)
-        constituentID = elementA["ConstituentID"]
-        artistName = getArtistsName(catalog, constituentID)
-        print("Título: ", elementA["Title"], ", Artista(s): ", artistName, ", Fecha: ", elementA["Date"], ", Medio: ", elementA["Medium"], ", Dimensiones: "
-        , elementA["Dimensions"])
-        i += 1
+    print("\nLas primeras tres obras son: ")
+    counted1 = 1
+    bigListIndex1 = 1
+    while counted1 <= 3 and bigListIndex1 <= size:
+        actualDate = lt.getElement(listA, bigListIndex1)["value"]
+        dateIndex = 1
+        if actualDate != None and actualDate != "":
+            while counted1 <= 3 and dateIndex <= lt.size(actualDate): 
+                elementA = lt.getElement(actualDate, dateIndex)
+                constituentID = elementA["ConstituentID"]
+                artistName = getArtistsName(catalog, constituentID)
+                print("Título: ", elementA["Title"], ", Artista(s): ", artistName, ", Fecha: ", elementA["Date"], ", Fecha de adquisición: ", elementA["DateAcquired"], "Medio: ", elementA["Medium"], ", Dimensiones: "
+                , elementA["Dimensions"])
+                counted1 += 1
+                dateIndex += 1
+        bigListIndex1 += 1
 
-    while h <= 3:
-        elementA = lt.getElement(listA, i)
-        constituentID = elementA["ConstituentID"]
-        artistName = getArtistsName(catalog, constituentID)
-        print("Título: ", elementA["Title"], ", Artista(s): ", artistName, ", Fecha: ", elementA["Date"], ", Medio: ", elementA["Medium"], ", Dimensiones: "
-        , elementA["Dimensions"])
-        h += 1
+    print("\nLas últimas tres obras son: ")
+    counted2 = 1
+    bigListIndex2 = size-2
+    while counted2 <= 3 and bigListIndex2 <= size:
+        actualDate = lt.getElement(listA, bigListIndex2)["value"]
+        dateIndex = 1
+        if actualDate != None and actualDate != "":
+            while counted2 <= 3 and dateIndex <= lt.size(actualDate): 
+                elementA = lt.getElement(actualDate, dateIndex)
+                constituentID = elementA["ConstituentID"]
+                artistName = getArtistsName(catalog, constituentID)
+                print("Título: ", elementA["Title"], ", Artista(s): ", artistName,  ", Fecha de adquisición: ", elementA["DateAcquired"], ", Fecha: ", elementA["Date"], ", Medio: ", elementA["Medium"], ", Dimensiones: "
+                , elementA["Dimensions"])
+                counted2 += 1
+                dateIndex += 1
+        bigListIndex2 += 1
+
+    print("\nEl número de obras adquiridas por compra (purchase) es de: ", purchased)
 
 
 def printLoadResult(catalog):
@@ -237,11 +262,11 @@ while True:
         date1 = input("Ingrese la fecha hasta la cual filtrar (en forma AAAA-MM-DD): ")
         start_time = time.process_time()
         result = controller.sortArtworksByAcquiredDate(catalog, date0, date1)
-        elapsed_time_mseg = (stop_time - start_time)*1000
 
-        print("\nLa operación tardó ", elapsed_time_mseg, " milisegundos.")
-        print("\nEl número total de obras en el rango cronológico es de ")
         printFirstandLast(result)
+        stop_time = time.process_time()
+        elapsed_time_mseg = (stop_time - start_time)*1000
+        print("\nLa operación tardó ", elapsed_time_mseg, " milisegundos.")
     
     elif int(inputs[0]) == 4:
         ArtistName = input("Indique el nombre del artista a consultar: ")

@@ -108,7 +108,7 @@ def addArtwork(catalog, artwork):
         mp.put(catalog["dateAcquired"], dateAcquired, listdA)
     else:
         listdA = lt.newList('ARRAY_LIST')
-        lt.addLast(listdA, dateAcquired)
+        lt.addLast(listdA, artwork)
         mp.put(catalog["dateAcquired"], dateAcquired, listdA)
 
 
@@ -552,8 +552,12 @@ def sortArtworksByAcquiredDate(catalog, date0, date1):
     for i in range(1, lt.size(datesA)+1):
         actualKey = lt.getElement(datesA, i)
         actualPair = mp.get(catalog["dateAcquired"],actualKey)
-        if strDateToInt(date0) <= strDateToInt(actualKey) <= strDateToInt(date1):
-            lt.addLast(orderedDateA, actualPair)
+        print(date0)
+        print(actualKey)
+        print(date1)
+        if actualKey != None and actualKey != "":
+            if strDateToInt(date0) <= strDateToInt(actualKey) <= strDateToInt(date1):
+                lt.addLast(orderedDateA, actualPair)
     
     mes.sort(orderedDateA, cmpByDate)
 
