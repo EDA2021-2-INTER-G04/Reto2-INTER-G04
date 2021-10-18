@@ -56,48 +56,33 @@ def isDead(Date):
 
 def printSortedArtists(ord_artists, sample=3):
     size = lt.size(ord_artists)
-    numArtists = 0
 
-    for n in range(1, size+1):
-        actualList = lt.getElement(ord_artists, n)
-        numArtists += lt.size(actualList)
-
-    if numArtists == 0:
+    if size == 0:
         print("\nNo se encontraron obras adquiridas dentro del rango ingresado.\n")
 
-    elif numArtists > sample:
-        print("\nEl número de artistas que nacieron entre esos años es de ", numArtists ," artistas.")
+    elif size > sample:
+        print("\nEl número de artistas que nacieron entre esos años es de ", size ," artistas.")
 
         print("\nLas primeras ", sample, " obras ordenadas son:")
         counted1=1
-        valuesListsIndex1=1
-        yearListIndex1=1
-        while counted1 <= sample and valuesListsIndex1 <= size:
-            actualYear = lt.getElement(ord_artists, valuesListsIndex1)
-            while yearListIndex1 <= lt.size(actualYear) and counted1 <= sample:
-                artist = lt.getElement(actualYear, yearListIndex1)
-                print('\nNombre: ' + artist['DisplayName'] + ', Año de nacimiento: ' + artist['BeginDate'] + ', Año de fallecimiento: ' + isDead(artist['EndDate']) + ', Nacionalidad: ' + artist['Nationality'] + ", Género: " + artist["Gender"])
-                counted1 += 1
-                yearListIndex1 += 1
-                
-            valuesListsIndex1 += 1
+        i = 1
+        while counted1 <= sample and i <= size:
+            artist = lt.getElement(ord_artists, i)
+            print('\nNombre: ' + artist['DisplayName'] + ', Año de nacimiento: ' + artist['BeginDate'] + ', Año de fallecimiento: ' + isDead(artist['EndDate']) + ', Nacionalidad: ' + artist['Nationality'] + ", Género: " + artist["Gender"])
+            counted1 += 1
+            i += 1
 
         print("\nLas últimas ", sample, " obras ordenadas son:")
         counted2=1
-        valuesListsIndex2=size
+        j=size
         finalArtists = lt.newList(datastructure="SINGLE_LINKED")
-        while counted2 <= sample and 1 <= valuesListsIndex2 <= size:
-            actualYear = lt.getElement(ord_artists, valuesListsIndex2)
-            actualSize = lt.size(actualYear)
-            yearListIndex2 = actualSize
-            while 1 <= yearListIndex2 <= actualSize and counted2 <= sample:
-                artist = lt.getElement(actualYear, yearListIndex2)
-                lt.addFirst(finalArtists, artist)
-                counted2 += 1
-                yearListIndex2 -= 1
-            valuesListsIndex2 -= 1
-        for i in range(1,4):
-            artist = lt.getElement(finalArtists, i)
+        while counted2 <= sample and 1 <= j <= size:
+            artist = lt.getElement(ord_artists, j)
+            lt.addFirst(finalArtists, artist)
+            counted2 += 1
+            j -= 1
+        for k in range(1,4):
+            artist = lt.getElement(finalArtists, k)
             print('\nNombre: ' + artist['DisplayName'] + ', Año de nacimiento: ' + artist['BeginDate'] + ', Año de fallecimiento: ' + isDead(artist['EndDate']) + ', Nacionalidad: ' + artist['Nationality'] + ", Género: " + artist["Gender"])
 
 
