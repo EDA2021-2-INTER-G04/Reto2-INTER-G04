@@ -85,6 +85,8 @@ def newCatalog():
 
     catalog["artistName"] = mp.newMap(numArtists, maptype="CHAINING", loadfactor=4.0, comparefunction=cmpMaps)
 
+    catalog["artworkCID"] = mp.newMap(initialSize, maptype="CHAINING", loadfactor=4.0, comparefunction=cmpMaps)
+
     return catalog
 
 # Funciones para agregar informacion al catalogo
@@ -147,6 +149,17 @@ def addArtwork(catalog, artwork):
         listd = lt.newList('ARRAY_LIST')
         lt.addLast(listd, artwork)
         mp.put(catalog["department"], artworkDepartment, listd)
+
+    artworkCID = artwork["ConstituentID"]
+    isPresent = mp.contains(catalog["artworkCID"], artworkCID)
+    if isPresent:
+        listC = mp.get(catalog["artworkCID"], artworkCID)["value"]
+        lt.addLast(listC, artwork)
+        mp.put(catalog["artworkCID"], artworkCID, listC)
+    else:
+        listC = lt.newList('ARRAY_LIST')
+        lt.addLast(listC, artwork)
+        mp.put(catalog["artworkCID"], artworkCID, listC)
 
 
 def addArtist(catalog, artist):
@@ -420,27 +433,34 @@ def filterTechnicArtists(catalog, ArtistName):
             artistID = element0["ConstituentID"]
             found = True
         k += 1
-    
-    dataArtwork = catalog["artworks"]
+
     mediumList = lt.newList()
     newmedium = {}
-
+    found = False
+    ListArtworks = mp.keySet(catalog["artworkCID"])
+    i=1
+    while found == False and i <= lt.size(ListArtworks):
+        actualArtwork = lt.getElement(ListArtworks, i)
+        actualKey = mp.get(catalog["artworkCID"], actualArtwork)["key"]
+        if artistID in actualKey:
+            filterListArtworks = mp.get(catalog["artworkCID"], actualKey)["value"]
+            found = True
+        i += 1
+     
     i = 0
-    while i < lt.size(dataArtwork):
-        element = lt.getElement(dataArtwork, i)
-        artworkID = element["ConstituentID"] 
-        if artistID in artworkID:
-            medium = element["Medium"]
-            if medium in newmedium:
-                artworkmed = newmedium[medium]
-                lt.addLast(artworkmed, element)
-                newmedium[medium] = artworkmed
-            else:
-                artworkmed = lt.newList()
-                lt.addLast(artworkmed, element)
-                newmedium[medium] = artworkmed
-                lt.addLast(mediumList, element)
-        i = i + 1
+    while i <= lt.size(filterListArtworks):
+        element = lt.getElement(filterListArtworks,i)
+        medium = element["Medium"]
+        if medium in newmedium:
+            artworkmed = newmedium[medium]
+            lt.addLast(artworkmed, element)
+            newmedium[medium] = artworkmed
+        else:
+            artworkmed = lt.newList()
+            lt.addLast(artworkmed, element)
+            newmedium[medium] = artworkmed
+            lt.addLast(mediumList, element)
+        i += 1
 
     totalArtworks = 0
     mostTimes = 0
