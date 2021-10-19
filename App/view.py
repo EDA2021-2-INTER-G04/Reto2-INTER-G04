@@ -301,6 +301,22 @@ while True:
             print(r, ". ", nationality, ": ", number)
             h -= 1
             r += 1
+        
+        topNatList = lt.getElement(topTen, lt.size(topTen))["value"]
+        topNat = lt.getElement(topTen, lt.size(topTen))["key"]
+        print("\nLas primeras tres obras de la nacionalidad ", topNat, " son:")
+        for i in range(1, 4):
+            actualArtwork = lt.getElement(topNatList, i)
+            artists = getArtistsName(catalog, actualArtwork["ConstituentID"])
+            print("Título: ", actualArtwork["Title"], ", Artista(s): ", artists, ", Fecha: ", actualArtwork["Date"], ", Medio: ", actualArtwork["Medium"], ", Dimensiones: ", actualArtwork["Dimensions"])
+        
+        print("\nLas últimas tres obras de la nacionalidad ", topNat, " son:")
+        for k in range(1, 4):
+            index = lt.size(topNatList)-3+k
+            actualArtwork = lt.getElement(topNatList, index)
+            artists = getArtistsName(catalog, actualArtwork["ConstituentID"])
+            print("Título: ", actualArtwork["Title"], ", Artista(s): ", artists, ", Fecha: ", actualArtwork["Date"], ", Medio: ", actualArtwork["Medium"], ", Dimensiones: ", actualArtwork["Dimensions"])
+        
         stop_time = time.process_time()
         elapsed_time_mseg = (stop_time - start_time)*1000
         print("\nLa operación tardó ", elapsed_time_mseg, " mseg.")
