@@ -1,5 +1,5 @@
-- Paula Daza Díaz, 202111276, p.dazad@uniandes.edu.co
-- Juan David Aparicio, 202116532, j.apariciog@uniandes.edu.co
+- Paula Daza Díaz, 202111276, p.dazad@uniandes.edu.co. Req3
+- Juan David Aparicio, 202116532, j.apariciog@uniandes.edu.co. Req4
 
 
 #ISIS1225 - Librerias de soporte
