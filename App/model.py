@@ -58,8 +58,8 @@ def newCatalog():
                "nationality": None,
                "birth": None,
                "dateAcquired": None,
-               "creditLine": None,
-               "department": None}
+               "department": None,
+               "artistName": None}
 
     catalog['artworks'] = lt.newList()
     catalog['artists'] = lt.newList("ARRAY_LIST")
@@ -81,9 +81,10 @@ def newCatalog():
 
     catalog["dateAcquired"] = mp.newMap(initialSize, maptype="CHAINING", loadfactor=4.0, comparefunction=cmpMaps)
 
-    catalog["creditLine"] = mp.newMap(initialSize, maptype="PROBING", loadfactor=0.4, comparefunction=cmpMaps)
-
     catalog["department"] = mp.newMap(10, maptype="PROBING", loadfactor=0.5, comparefunction=cmpMaps)
+
+    catalog["artistName"] = mp.newMap(numArtists, maptype="CHAINING", loadfactor=4.0, comparefunction=cmpMaps)
+
     return catalog
 
 # Funciones para agregar informacion al catalogo
@@ -164,6 +165,18 @@ def addArtist(catalog, artist):
             lt.addLast(listYears, artist)
             mp.put(catalog["birth"], birthYear, listYears)
     
+    artistName = artist["DisplayName"]
+    isPresent = mp.contains(catalog["artistName"], artistName)
+    if isPresent:
+        listA = mp.get(catalog["artistName"], artistName)["value"]
+        lt.addLast(listA, artist)
+        mp.put(catalog["artistName"], artistName, listA)
+    else:
+        listA = lt.newList('ARRAY_LIST')
+        lt.addLast(listA, artist)
+        mp.put(catalog["artistName"], artistName, listA)
+    
+
 # Funciones para creacion de datos
 
 def newArtist(name):
@@ -306,13 +319,6 @@ def cmpArterokByDateAcquired(date1, date2):
     else:
         return -1
 
-def comparebyCreditLine(creditLine):
-
-    if creditLine == "Purchase":
-        return True
-    else:
-        return False
-
 def sortArtworks(catalog, size, sortingtype):
     sub_list = lt.subList(catalog['artworks'], 1, size)
     sub_list = sub_list.copy()
@@ -402,20 +408,23 @@ def getArtistsName(catalog, constituentID):
 
 def filterTechnicArtists(catalog, ArtistName):
 
-    filterListArtist = lt.newList()
+    ListArtist = mp.keySet(catalog["artistName"])
+    found = False
+    k=1
+    while found == False and k <= lt.size(ListArtist):
+        actualArtist = lt.getElement(ListArtist, k)
+        actualKey = mp.get(catalog["artistName"], actualArtist)["key"]
+        if actualKey.lower() == ArtistName.lower():
+            filterListArtist = mp.get(catalog["artistName"], actualKey)["value"]
+            element0 = lt.getElement(filterListArtist, 1)
+            artistID = element0["ConstituentID"]
+            found = True
+        k += 1
+    
+    dataArtwork = catalog["artworks"]
     mediumList = lt.newList()
     newmedium = {}
-    i = 0
-    dataArtist = catalog["artists"]
-    dataArtwork = catalog["artworks"]
-    while i < lt.size(dataArtist):
-        element = lt.getElement(dataArtist, i)
-        artist = element["DisplayName"]
-        if artist.lower() == ArtistName.lower():
-            artistID = element["ConstituentID"]
-            lt.addLast(filterListArtist, element)
-        i = i + 1
-    
+
     i = 0
     while i < lt.size(dataArtwork):
         element = lt.getElement(dataArtwork, i)

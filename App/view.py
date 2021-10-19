@@ -270,6 +270,7 @@ while True:
     
     elif int(inputs[0]) == 4:
         ArtistName = input("Indique el nombre del artista a consultar: ")
+        start_time = time.process_time()
         result = controller.filterTechnicArtists(catalog, ArtistName)
         dictT = result[4]
         listT = dictT[result[2]]
@@ -283,7 +284,10 @@ while True:
             print("Título: ", element["Title"], ", Fecha: ", element["Date"], ", Medio: ", element["Medium"], ", Dimensiones: "
             , element["Dimensions"])
             i += 1
-        
+        stop_time = time.process_time()
+        elapsed_time_mseg = (stop_time - start_time)*1000
+        print("\nLa operación tardó ", elapsed_time_mseg, " milisegundos.")
+    
     elif int(inputs[0]) == 5:
         start_time = time.process_time()
         topTen = controller.topTenNats(catalog)
