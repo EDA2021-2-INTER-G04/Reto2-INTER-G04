@@ -512,6 +512,7 @@ def transportArtworks(catalog, department):
                 m3 = 0
         else:
             m2 = 0
+            m3 = 0
         
         sumx = kg + m2 + m3
         elementCost = 0
